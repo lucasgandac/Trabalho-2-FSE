@@ -1,5 +1,6 @@
 import serial
 import crcmod
+import struct
 
 uart = serial.Serial('/dev/serial0',9600, 8)
 if (uart == -1):
@@ -16,4 +17,9 @@ msg = m1 + crc.to_bytes(2, 'little')
            
 print("escrevendo...")
 uart.write(msg)
+response = uart.read(4) # read the response
+print(response)
+#last_byte = response[-1]
+#float_data = struct.unpack('f', response)[-1]
+#print(last_byte)
 print(msg)
