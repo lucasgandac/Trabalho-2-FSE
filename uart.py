@@ -27,6 +27,7 @@ def initEstado(uart):
     uart.write(msg1)
     uart.write(msg2)
     uart.write(msg3)
+    time.sleep(0.5)
 
 def adicionaCRC(mensagem):
     crc16 = crcmod.predefined.mkCrcFun('crc-16')
@@ -34,25 +35,54 @@ def adicionaCRC(mensagem):
     crc = crc.to_bytes(2, 'little')
     mensagem = mensagem + crc
     return mensagem
-    
+
+def solicitaTemperaturas(uart):
+    tempInterna = b''.join([b'\x01', b'\x23', b'\xC1', matricula])
+    tempReferencia = b''.join([b'\x01', b'\x23', b'\xC2', matricula])
+    msgInterna = adicionaCRC(tempInterna)
+    msgReferencia = adicionaCRC(tempReferencia)
+    uart.write(msgInterna)
+    print("escrevendo primeira", msgInterna)
+    interna = uart.read(9)
+    print(interna)
+    uart.write(msgReferencia)
+    referencia = uart.read(9)
+    return interna, referencia
+
+
+
 uart = initUart()
-initEstado(uart)
-m1 = b''.join([b'\x01', b'\x16', b'\xC1', b'\x09\x06\x06\x08'])
+#initEstado(uart)
+time.sleep(1)
+interna, referencia = solicitaTemperaturas(uart)
+print("Codigo da temp interna", interna)
+print("Codigo da temp referencia", referencia)
+pos = referencia[3:7]
+f = struct.unpack('f', pos)
+f = str(f)
+f = f.replace('(', '').replace(')', '').replace(',','')
+print(f)
+print(type(f))
+'''m1 = b''.join([b'\x01', b'\x16', b'\xC1', b'\x09\x06\x06\x08'])
 
 crc16 = crcmod.predefined.mkCrcFun('crc-16')
 crc = crc16(m1)
 msg = m1 + crc.to_bytes(2, 'little')
-print(msg)
-print(adicionaCRC(m1))
+#print(msg)
+#print(adicionaCRC(m1))'''
 
-m3 = b''.join([b'\x01', b'\x23', b'\xC3', b'\x09\x06\x06\x08'])
+'''m3 = b''.join([b'\x01', b'\x23', b'\xC1', b'\x09\x06\x06\x08'])
 crc16 = crcmod.predefined.mkCrcFun('crc-16')
 crc3 = crc16(m3)
 msg = m3 + crc3.to_bytes(2, 'little')
 uart.write(msg)
 response = uart.read(9)
-print(response)
-'''while True:
+pos = response[3:7]
+f = struct.unpack('f', pos)
+print("Temp interna: ", f)
+
+
+while True:
     uart.write(message)
     if uart.inWaiting() > 0:
         response = uart.read(4)
