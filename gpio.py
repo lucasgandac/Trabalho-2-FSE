@@ -13,23 +13,23 @@ class GpioController:
     def ligaResistor(self):
         dc = 0
         pwm = gpio.PWM(24,1000)
+        pwm.start(0)
         while True:
-            pwm.ChangeDutyCycle(60)
-        '''pwm.start(0)
-        while True:
+            pwm.ChangeDutyCycle(100)
+        '''while True:
             if dc > 60:
                 dc = 60
             pwm.ChangeDutyCycle(dc)
             dc += 1'''
             
     def desligaResistor(self):
-        gpio.output(23,True)
-        time.sleep(10)
-        gpio.output(23,False)
+        '''gpio.output(23,True)
+        time.sleep(40)
+        gpio.output(23,False)'''
         
 controleTemp = GpioController()
-#controleTemp.ligaResistor()
-controleTemp.desligaResistor()
+controleTemp.ligaResistor()
+#controleTemp.desligaResistor()
 
 '''gpio.setmode(gpio.BCM)
 gpio.setwarnings(False)
