@@ -3,9 +3,9 @@ class PID:
         self.saida_medida = 0.0
         self.sinal_de_controle = 0.0
         self.referencia = 0.0
-        self.Kp = 0.0  # Ganho Proporcional
-        self.Ki = 0.0  # Ganho Integral
-        self.Kd = 0.0  # Ganho Derivativo
+        self.Kp = 30.0  # Ganho Proporcional
+        self.Ki = 0.2  # Ganho Integral
+        self.Kd = 400.0  # Ganho Derivativo
         self.T = 1.0  # Periodo de Amostragem (ms)
         self.last_time = 0
         self.erro_total = 0.0
