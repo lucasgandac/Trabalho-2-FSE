@@ -3,6 +3,7 @@ from pid import PID
 from bme import BME280Sensor
 from gpio import GpioController
 from uart import UartController
+import time
 
 class MainController:
     def __init__(self):
@@ -10,13 +11,13 @@ class MainController:
         self.i2c = BME280Sensor()
         self.uart = UartController()
 
-        self.gpio.__init__()
-        self.i2c.__init__()
-        self.uart.__init__()
+        print("Inicializa")
         self.conexaoUart = self.uart.initUart()
-        self.uart.init_estado()
+        self.uart.initEstado(self.conexaoUart)
+        print("Inicializa")
 
     def interpretaComando(self, comando):
+        print(comando)
         if comando == 161:
             print("Liga o forno")
         if comando == 162:
@@ -29,12 +30,11 @@ class MainController:
             print("Alterna o modo temperatura")
 
     def run(self):
-        print("teste")
         while True:
-            print("dedntro dod run")
-            comando = self.uart.read_command(self.conexaoUart)
+            comando = self.uart.leComandos(self.conexaoUart)
             print(comando)
             self.interpretaComando(comando)
+            time.sleep(0.5)
             #self.estado.control_temp(command)
 
 # create an instance of MainController

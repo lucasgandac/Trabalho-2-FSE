@@ -80,13 +80,14 @@ class UartController:
         uart.write(msgLeitura)
         response = uart.read(9)
         comando = response[3]
-        time.sleep(0.5)
         return comando
+    
         
-uartObj = UartController() 
+'''uartObj = UartController() 
 uartConexao = uartObj.initUart()
 while True:
     uartObj.leComandos(uartConexao)
+    time.sleep(0.5)'''
         
 '''temp_control = TemperatureControl()
 uart = temp_control.initUart()

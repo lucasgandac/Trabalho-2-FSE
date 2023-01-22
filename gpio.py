@@ -5,6 +5,7 @@ import time
 
 class GpioController:
     def __init__(self):
+        gpio.cleanup()
         gpio.setmode(gpio.BCM)
         gpio.setwarnings(False)
         gpio.setup(23, gpio.OUT)
@@ -21,11 +22,11 @@ class GpioController:
             ligaVentoinha(sinalControle)
                
     def ligaResistor(self, sinalControle):
-        if dc > 100:
-          dc = 100
-        self.pwmResistor.ChangeDutyCycle(dc)
+        if sinalControle > 100:
+          sinalControle = 100
+        self.pwmResistor.ChangeDutyCycle(sinalControle)
         
-    def ligaResistor(self, sinalControle):
+    def ligaVentoinha(self, sinalControle):
         sinalControle = sinalControle * (-1)
         if sinalControle > 100:
           sinalControle = 100
@@ -33,13 +34,13 @@ class GpioController:
           sinalControle = 40
         self.pwmVentoinha.ChangeDutyCycle(dc)
         
-controleTemp = GpioController()
 #pwm = gpio.PWM(23,1000)
 #pwm.start(0)
 #pwm.ChangeDutyCycle(100)
-'''dc = 100
+'''control_temp = GpioController()
+dc = 100
 while True:
-      controleTemp.ligaResistor( dc)'''
+    control_temp.ligaResistor(dc)'''
 
 
 #controleTemp.desligaResistor()
