@@ -34,6 +34,13 @@ class UartController:
              print("UART inicializada!\n");
         return self.uart
 
+    def enviaControle(self, uart, controle):
+        controle = int(controle)
+        controletoByte = controle.to_bytes(4, 'little', signed=True)
+        mensagem = b''.join([self.codigo16, self.codD1, self.matricula, controletoByte])
+        msg = self.adicionaCRC(mensagem)
+        uart.write(msg)
+
     def initEstado(self, uart):
         estado = b''.join([self.codigo16, self.codD3, self.matricula, self.codOff ])
         funcionamento = b''.join([self.codigo16, self.codD4, self.matricula, self.codOff ])
@@ -95,125 +102,21 @@ class UartController:
     '''def modoTemperatura(self, uart, comando):
         if comando ==  '''
     
-    def enviaComando(self, uart, comando):
+    def enviaComando(self, uart, comando, estado):
         comandosList = {161: b''.join([self.codigo23, self.codD3,self.matricula,self.codOn]), 162: b''.join([self.codigo23,self.codD3,self.matricula,self.codOff]), 163: b''.join([self.codigo23, self.codD5,self.matricula,self.codOn]), 
                    164: b''.join([self.codigo23, self.codD5,self.matricula,self.codOff])}
-        if comando in comandosList:
-            print(comando)
+        if (comando == 163 and estado == 0 ):  
+            pass
+        elif comando == 162:
+            codsist = comandosList[comando]
+            codfunc = b''.join([self.codigo23, self.codD5,self.matricula,self.codOff])
+            msgSist = self.adicionaCRC(codsist)
+            uart.write(msgSist)
+            msgFunc = self.adicionaCRC(codfunc)
+            uart.write(msgFunc)
+            self.leituraModoTemp(uart, 0)
+        elif comando in comandosList:
             cod = comandosList[comando]
-            print(cod)
             msgEnvio = self.adicionaCRC(cod)
             uart.write(msgEnvio)
             
-'''uartObj = UartController() 
-uartConexao = uartObj.initUart()
-while True:
-    uartObj.leComandos(uartConexao)
-    time.sleep(0.5)'''
-        
-'''temp_control = TemperatureControl()
-uart = temp_control.initUart()
-#temp_control.initEstado(uart)
-interna, referencia = temp_control.solicitaTemperaturas(uart)
-pid = PID()
-pid.pid_atualiza_referencia(referencia)
-print(pid.pid_controle(interna))
-print(interna, referencia)
-'''
-
-'''matricula = b'\x09\x06\x06\x08'
-codigo16 = b'\x01\x16'
-codigo23 = b'\x01\x23'
-codC1 = b'\xC1'
-codC2 = b'\xC2'
-codC3 = b'\xC3'
-codD1 = b'\xD1'
-codD2 = b'\xD2'
-codD3 = b'\xD3'
-codD4 = b'\xD4'
-codD5 = b'\xD5'
-codD6 = b'\xD6'
-codOn = b'\x01'
-codOff = b'\x02'
-
-def initUart():
-    uart = serial.Serial('/dev/serial0',9600, 8)
-    if (uart == -1):
-        print("Erro - Não foi possível iniciar a UART.\n");
-    else:
-        print("UART inicializada!\n");
-    return uart
-
-def initEstado(uart):
-    estado = b''.join([codigo16, codD3, matricula, codOff ])
-    funcionamento = b''.join([codigo16, codD4, matricula, codOff ])
-    controleTemp = b''.join([codigo16, codD5, matricula, codOff ])
-    msg1 = adicionaCRC(estado)
-    msg2 = adicionaCRC(funcionamento)
-    msg3 = adicionaCRC(controleTemp)
-    uart.write(msg1)
-    uart.write(msg2)
-    uart.write(msg3)
-    time.sleep(0.5)
-
-def adicionaCRC(mensagem):
-    crc16 = crcmod.predefined.mkCrcFun('crc-16')
-    crc = crc16(mensagem)
-    crc = crc.to_bytes(2, 'little')
-    mensagem = mensagem + crc
-    return mensagem
-
-def solicitaTemperaturas(uart):
-    codInterna = b''.join([codigo23, codC1, matricula])
-    codReferencia = b''.join([codigo23, codC2, matricula])
-    msgInterna = adicionaCRC(codInterna)
-    msgReferencia = adicionaCRC(codReferencia)
-    uart.write(msgInterna)
-    interna = uart.read(9)
-    uart.write(msgReferencia)
-    referencia = uart.read(9)
-    tempReferencia = referencia[3:7]
-    ref = struct.unpack('f', tempReferencia)
-    ref = str(ref)
-    ref = ref.replace('(', '').replace(')', '').replace(',','')
-    tempInterna = interna[3:7]
-    itrn = struct.unpack('f', tempInterna)
-    itrn = str(itrn)
-    itrn = itrn.replace('(', '').replace(')', '').replace(',','')
-    return itrn, ref
-
-'''
-
-'''uart = initUart()
-#initEstado(uart
-time.sleep(1)
-#initEstado(uart)
-interna, referencia = solicitaTemperaturas(uart)
-print("Temperatura interna", interna)
-print("Temperatura referencia", referencia)'''
-
-'''m1 = b''.join([b'\x01', b'\x16', b'\xC1', b'\x09\x06\x06\x08'])
-
-crc16 = crcmod.predefined.mkCrcFun('crc-16')
-crc = crc16(m1)
-msg = m1 + crc.to_bytes(2, 'little')
-#print(msg)
-#print(adicionaCRC(m1))'''
-
-'''m3 = b''.join([b'\x01', b'\x23', b'\xC1', b'\x09\x06\x06\x08'])
-crc16 = crcmod.predefined.mkCrcFun('crc-16')
-crc3 = crc16(m3)
-msg = m3 + crc3.to_bytes(2, 'little')
-uart.write(msg)
-response = uart.read(9)
-pos = response[3:7]
-f = struct.unpack('f', pos)
-print("Temp interna: ", f)
-
-
-while True:
-    uart.write(message)
-    if uart.inWaiting() > 0:
-        response = uart.read(4)
-        print(response)
-    time.sleep(0.5)'''

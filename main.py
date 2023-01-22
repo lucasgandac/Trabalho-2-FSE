@@ -16,9 +16,19 @@ class MainController:
         self.conexaoUart = self.uart.initUart()
         self.uart.initEstado(self.conexaoUart)
         self.modoTemp = 0
-
-    #def controleTemperatura(self):
-
+        self.estadoSistema = 0 
+        self.estadoFuncionamento = 0
+        
+    def controleTemperatura(self):
+        tempAmbiente = self.i2c.read_data()
+        tempInterna,tempRef = self.uart.solicitaTemperaturas(self.conexaoUart)
+        self.pid.pid_atualiza_referencia(tempRef)
+        sinalControle = self.pid.pid_controle(tempInterna)
+        self.uart.enviaControle(self.conexaoUart , sinalControle)
+        self.gpio.controlaTemperatura(sinalControle)
+        '''print("Temp Ambiente: ", tempAmbiente)
+        print("Temp Interna: ",tempInterna)
+        print("Temp Referência: ", tempRef)'''
 
     def interpretaComando(self, comando):
         valid_comandos = [161, 162, 163, 164, 165]
@@ -30,7 +40,17 @@ class MainController:
                 self.modoTemp = 0
                 self.uart.leituraModoTemp(self.conexaoUart, self.modoTemp)
         elif comando in valid_comandos:
-            self.uart.enviaComando(self.conexaoUart, comando)
+            if comando == 161 :
+                self.estadoSistema = 1
+            if comando == 162 :
+                self.estadoSistema = 0
+                self.estadoFuncionamento = 0
+                self.modoTemp = 0
+            if (comando == 163 and self.estadoSistema==1):
+                self.estadoFuncionamento = 1
+            if comando == 164 :
+                self.estadoFuncionamento = 0
+            self.uart.enviaComando(self.conexaoUart, comando, self.estadoSistema)
 
     def menu(self):
         while True:
@@ -57,6 +77,10 @@ class MainController:
             #print(comando)
             #self.pid.printaPID()
             self.interpretaComando(comando)
+            self.controleTemperatura()
+            '''print("Estado do sistema : ", self.estadoSistema)
+            print("Estado do forno : ", self.estadoFuncionamento)
+            print("Controle temperatura : ", self.modoTemp)'''
             time.sleep(0.5)
             #self.estado.control_temp(command)
 

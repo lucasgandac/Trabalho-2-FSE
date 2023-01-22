@@ -17,9 +17,9 @@ class GpioController:
         
     def controlaTemperatura(self, sinalControle):
         if sinalControle > 0:
-            ligaResistor(sinalControle)
+            self.ligaResistor(sinalControle)
         if sinalControle < 0:
-            ligaVentoinha(sinalControle)
+            self.ligaVentoinha(sinalControle)
                
     def ligaResistor(self, sinalControle):
         if sinalControle > 100:
@@ -32,7 +32,8 @@ class GpioController:
           sinalControle = 100
         if sinalControle < 40:
           sinalControle = 40
-        self.pwmVentoinha.ChangeDutyCycle(dc)
+        print(sinalControle)
+        self.pwmVentoinha.ChangeDutyCycle(sinalControle)
         
 #pwm = gpio.PWM(23,1000)
 #pwm.start(0)

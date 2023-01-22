@@ -17,6 +17,9 @@ class PID:
         self.Kp = Kp_
         self.Ki = Ki_
         self.Kd = Kd_
+        
+    def printaPID(self):
+        print(self.Kp, self.Ki, self.Kd)
 
     def pid_atualiza_referencia(self, referencia_):
         self.referencia = referencia_
