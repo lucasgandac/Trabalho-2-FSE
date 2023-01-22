@@ -32,7 +32,7 @@ class GpioController:
           sinalControle = 100
         if sinalControle < 40:
           sinalControle = 40
-        print(sinalControle)
+        #print(sinalControle)
         self.pwmVentoinha.ChangeDutyCycle(sinalControle)
         
 #pwm = gpio.PWM(23,1000)

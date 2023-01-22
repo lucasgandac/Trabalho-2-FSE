@@ -5,6 +5,8 @@ from gpio import GpioController
 from uart import UartController
 import time
 import threading
+import csv 
+import datetime
 
 class MainController:
     def __init__(self):
@@ -18,17 +20,24 @@ class MainController:
         self.modoTemp = 0
         self.estadoSistema = 0 
         self.estadoFuncionamento = 0
+        self.tempReferencia = 0
         
+    def registraLog(self, intn, ref, amb, resis):
+        current_time = datetime.datetime.now()
+        with open('logs/log.csv', 'a') as f:
+            cm = str(current_time) + ", " + str(intn) + ", " + str(ref) +", " + str(amb) + ", " + str(resis)
+            f.write(cm + '\n')
+   
     def controleTemperatura(self):
         tempAmbiente = self.i2c.read_data()
         tempInterna,tempRef = self.uart.solicitaTemperaturas(self.conexaoUart)
-        self.pid.pid_atualiza_referencia(tempRef)
+        if(self.modoTemp==0):
+            self.tempReferencia = tempRef
+        self.pid.pid_atualiza_referencia(self.tempReferencia)
         sinalControle = self.pid.pid_controle(tempInterna)
         self.uart.enviaControle(self.conexaoUart , sinalControle)
         self.gpio.controlaTemperatura(sinalControle)
-        '''print("Temp Ambiente: ", tempAmbiente)
-        print("Temp Interna: ",tempInterna)
-        print("Temp Referência: ", tempRef)'''
+        self.registraLog(tempInterna, self.tempReferencia, tempAmbiente, sinalControle)
 
     def interpretaComando(self, comando):
         valid_comandos = [161, 162, 163, 164, 165]
@@ -65,6 +74,9 @@ class MainController:
                     self.modoTemp = 0
                 elif optionTemp == "1" : 
                     self.modoTemp = 1
+                    temperatura = input("Digite o valor da temperatura de referência: ")
+                    temperatura = float(temperatura)
+                    self.tempReferencia = temperatura
             elif option == "2":
                 kp = input("Digite o valor de Kp: " )
                 ki = input("Digite o valor de Ki: " )
