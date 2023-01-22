@@ -7,8 +7,9 @@ import serial
 import crcmod
 import struct
 import time
+from pid import PID
 
-class TemperatureControl:
+class UartController:
     def __init__(self):
         self.matricula = b'\x09\x06\x06\x08'
         self.codigo16 = b'\x01\x16'
@@ -68,15 +69,34 @@ class TemperatureControl:
         itrn = struct.unpack('f', tempInterna)
         itrn = str(itrn)
         itrn = itrn.replace('(', '').replace(')', '').replace(',','')
+        itrn = float(itrn)
+        ref = float(ref)
         return itrn, ref
-
-
-temp_control = TemperatureControl()
+    
+    
+    def leComandos(self, uart):
+        codLeitura = b''.join([self.codigo23, self.codC3, self.matricula])
+        msgLeitura = self.adicionaCRC(codLeitura)
+        uart.write(msgLeitura)
+        response = uart.read(9)
+        comando = response[3]
+        time.sleep(0.5)
+        return comando
+        
+uartObj = UartController() 
+uartConexao = uartObj.initUart()
+while True:
+    uartObj.leComandos(uartConexao)
+        
+'''temp_control = TemperatureControl()
 uart = temp_control.initUart()
 #temp_control.initEstado(uart)
 interna, referencia = temp_control.solicitaTemperaturas(uart)
+pid = PID()
+pid.pid_atualiza_referencia(referencia)
+print(pid.pid_controle(interna))
 print(interna, referencia)
-
+'''
 
 '''matricula = b'\x09\x06\x06\x08'
 codigo16 = b'\x01\x16'

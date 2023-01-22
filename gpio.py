@@ -9,34 +9,37 @@ class GpioController:
         gpio.setwarnings(False)
         gpio.setup(23, gpio.OUT)
         gpio.setup(24, gpio.OUT)
+        self.pwmVentoinha = gpio.PWM(24,1000)
+        self.pwmVentoinha.start(0)
+        self.pwmResistor = gpio.PWM(23,1000)
+        self.pwmResistor.start(0)
         
-    def ligaResistor(self, dc, pwm):
-        #dc = 0
+    def controlaTemperatura(self, sinalControle):
+        if sinalControle > 0:
+            ligaResistor(sinalControle)
+        if sinalControle < 0:
+            ligaVentoinha(sinalControle)
+               
+    def ligaResistor(self, sinalControle):
         if dc > 100:
           dc = 100
-        pwm.ChangeDutyCycle(dc)
-        ''' pwm = gpio.PWM(23,1000)
-        pwm.start(dc)'''
-        #while True:
-        #pwm.ChangeDutyCycle(dc)
-        '''while True:
-            if dc > 100:
-                 dc = 100
-            pwm.ChangeDutyCycle(dc)
-            dc += 1'''
-            
-    def desligaResistor(self):
-        '''gpio.output(23,True)
-        time.sleep(40)
-        gpio.output(23,False)'''
+        self.pwmResistor.ChangeDutyCycle(dc)
+        
+    def ligaResistor(self, sinalControle):
+        sinalControle = sinalControle * (-1)
+        if sinalControle > 100:
+          sinalControle = 100
+        if sinalControle < 40:
+          sinalControle = 40
+        self.pwmVentoinha.ChangeDutyCycle(dc)
         
 controleTemp = GpioController()
-pwm = gpio.PWM(24,1000)
-pwm.start(0)
+#pwm = gpio.PWM(23,1000)
+#pwm.start(0)
 #pwm.ChangeDutyCycle(100)
-dc = 100
+'''dc = 100
 while True:
-      controleTemp.ligaResistor( dc, pwm)
+      controleTemp.ligaResistor( dc)'''
 
 
 #controleTemp.desligaResistor()
