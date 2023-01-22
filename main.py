@@ -17,18 +17,20 @@ class MainController:
         self.uart.initEstado(self.conexaoUart)
         self.modoTemp = 0
 
+    #def controleTemperatura(self):
+
+
     def interpretaComando(self, comando):
-        #print(comando)
-        if comando == 161:
-            print("Liga o forno")
-        if comando == 162:
-            print("Desliga o forno")
-        if comando == 163:
-            print("Inicia aquecimento")
-        if comando == 164:
-            print("Cancela processo")
+        valid_comandos = [161, 162, 163, 164, 165]
         if comando == 165:
-            print("Alterna o modo temperatura")
+            if self.modoTemp == 0 :
+                self.modoTemp = 1
+                self.uart.leituraModoTemp(self.conexaoUart, self.modoTemp)
+            elif self.modoTemp == 1 :
+                self.modoTemp = 0
+                self.uart.leituraModoTemp(self.conexaoUart, self.modoTemp)
+        elif comando in valid_comandos:
+            self.uart.enviaComando(self.conexaoUart, comando)
 
     def menu(self):
         while True:
@@ -53,7 +55,7 @@ class MainController:
         while True:
             comando = self.uart.leComandos(self.conexaoUart)
             #print(comando)
-            self.pid.printaPID()
+            #self.pid.printaPID()
             self.interpretaComando(comando)
             time.sleep(0.5)
             #self.estado.control_temp(command)

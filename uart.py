@@ -52,6 +52,16 @@ class UartController:
         mensagem = mensagem + crc
         return mensagem
 
+    def leituraModoTemp(self,uart, sinal):
+        if sinal == 0:
+            controle = self.codOff
+        elif sinal == 1:
+            controle = self.codOn            
+        cod = b''.join([self.codigo23, self.codD4, self.matricula, controle])
+        msg = self.adicionaCRC(cod)
+        uart.write(msg)
+        
+
     def solicitaTemperaturas(self, uart):
         codInterna = b''.join([self.codigo23, self.codC1, self.matricula])
         codReferencia = b''.join([self.codigo23, self.codC2, self.matricula])
@@ -82,7 +92,19 @@ class UartController:
         comando = response[3]
         return comando
     
-        
+    '''def modoTemperatura(self, uart, comando):
+        if comando ==  '''
+    
+    def enviaComando(self, uart, comando):
+        comandosList = {161: b''.join([self.codigo23, self.codD3,self.matricula,self.codOn]), 162: b''.join([self.codigo23,self.codD3,self.matricula,self.codOff]), 163: b''.join([self.codigo23, self.codD5,self.matricula,self.codOn]), 
+                   164: b''.join([self.codigo23, self.codD5,self.matricula,self.codOff])}
+        if comando in comandosList:
+            print(comando)
+            cod = comandosList[comando]
+            print(cod)
+            msgEnvio = self.adicionaCRC(cod)
+            uart.write(msgEnvio)
+            
 '''uartObj = UartController() 
 uartConexao = uartObj.initUart()
 while True:
