@@ -35,7 +35,8 @@ class MainController:
             self.tempReferencia = tempRef
         self.pid.pid_atualiza_referencia(self.tempReferencia)
         sinalControle = self.pid.pid_controle(tempInterna)
-        self.uart.enviaControle(self.conexaoUart , sinalControle)
+        if (self.estadoFuncionamento == 1):
+            self.uart.enviaControle(self.conexaoUart , sinalControle)
         self.gpio.controlaTemperatura(sinalControle)
         self.registraLog(tempInterna, self.tempReferencia, tempAmbiente, sinalControle)
 
@@ -90,9 +91,6 @@ class MainController:
             #self.pid.printaPID()
             self.interpretaComando(comando)
             self.controleTemperatura()
-            '''print("Estado do sistema : ", self.estadoSistema)
-            print("Estado do forno : ", self.estadoFuncionamento)
-            print("Controle temperatura : ", self.modoTemp)'''
             time.sleep(0.5)
             #self.estado.control_temp(command)
 
