@@ -29,16 +29,22 @@ class MainController:
             f.write(cm + '\n')
    
     def controleTemperatura(self):
-        tempAmbiente = self.i2c.read_data()
-        tempInterna,tempRef = self.uart.solicitaTemperaturas(self.conexaoUart)
-        if(self.modoTemp==0):
-            self.tempReferencia = tempRef
-        self.pid.pid_atualiza_referencia(self.tempReferencia)
-        sinalControle = self.pid.pid_controle(tempInterna)
-        if (self.estadoFuncionamento == 1):
-            self.uart.enviaControle(self.conexaoUart , sinalControle)
-        self.gpio.controlaTemperatura(sinalControle)
-        self.registraLog(tempInterna, self.tempReferencia, tempAmbiente, sinalControle)
+        print(self.estadoFuncionamento)
+        if(self.estadoFuncionamento ==1):
+            print("dentro")
+            tempAmbiente = self.i2c.read_data()
+            tempInterna,tempRef = self.uart.solicitaTemperaturas(self.conexaoUart)
+            print(tempInterna, tempRef)
+            if(self.modoTemp==0):
+                self.tempReferencia = tempRef
+            self.pid.pid_atualiza_referencia(self.tempReferencia)
+            sinalControle = self.pid.pid_controle(tempInterna)
+            if (self.estadoFuncionamento == 1):
+                self.uart.enviaControle(self.conexaoUart , sinalControle)
+                time.sleep(0.05)
+            self.gpio.controlaTemperatura(sinalControle)
+            self.registraLog(tempInterna, self.tempReferencia, tempAmbiente, sinalControle)
+            time.sleep(1)
 
     def interpretaComando(self, comando):
         valid_comandos = [161, 162, 163, 164, 165]
@@ -90,15 +96,18 @@ class MainController:
             #print(comando)
             #self.pid.printaPID()
             self.interpretaComando(comando)
-            self.controleTemperatura()
-            time.sleep(0.5)
+            #self.controleTemperatura()
+            time.sleep(0.4)
             #self.estado.control_temp(command)
 
 try: 
     main_controller = MainController()
     thread = threading.Thread(target=main_controller.menu, args=[])
-    thread.start()  
+    thread.start() 
+    thread2 = threading.Thread(target=main_controller.controleTemperatura, args=[])
+    thread2.start()   
     main_controller.run()
     
 except KeyboardInterrupt:
+    main_controller.uart.initEstado(main_controller.conexaoUart)
     exit()
