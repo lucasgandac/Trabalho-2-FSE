@@ -96,8 +96,21 @@ class UartController:
         msgLeitura = self.adicionaCRC(codLeitura)
         uart.write(msgLeitura)
         response = uart.read(9)
+        response = self.checaCrc(response)
         comando = response[3]
         return comando
+
+    def checaCrc(self, comando):
+        mensagem = comando[:7]
+        crc = comando [-2:]
+        crc16 = crcmod.predefined.mkCrcFun('crc-16')
+        crCalc = crc16(mensagem)
+        crCalc = crCalc.to_bytes(2, 'little')
+        if(crCalc == crc):
+            return comando
+        else:
+            return b'\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
     
     '''def modoTemperatura(self, uart, comando):
         if comando ==  '''
