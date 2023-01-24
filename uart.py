@@ -80,10 +80,9 @@ class UartController:
         msgReferencia = self.adicionaCRC(codReferencia)
         uart.write(msgInterna)
         interna = uart.read(9)
-        time.sleep(0.2)
+        time.sleep(0.1)
         uart.write(msgReferencia)
         referencia = uart.read(9)
-        time.sleep(0.2)
         tempReferencia = referencia[3:7]
         ref = struct.unpack('f', tempReferencia)
         ref = str(ref)
@@ -94,6 +93,11 @@ class UartController:
         itrn = itrn.replace('(', '').replace(')', '').replace(',','')
         itrn = float(itrn)
         ref = float(ref)
+        if(ref == 0 or itrn == 0):
+            uart.flushInput()
+            uart.flushOutput()
+            uart.reset_input_buffer()
+            uart.reset_output_buffer()
         return itrn, ref
     
     
@@ -111,7 +115,7 @@ class UartController:
             uart.flushOutput()
             uart.reset_input_buffer()
             uart.reset_output_buffer()
-        time.sleep(0.5)
+        time.sleep(0.2)
         tempInterna,tempRef = self.solicitaTemperaturas(uart)
         print(tempInterna, tempRef)
         return comando, tempInterna, tempRef
