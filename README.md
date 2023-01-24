@@ -18,3 +18,12 @@ python3 main.py
 ```
 
 Obs : Apesar do bug na gravaçao, a definição das variaveis Ki, Kp e Kd manualmente está funcionando corretamente
+
+
+## Imagens
+
+Segue print das curvas de aquecimento
+
+A da esquerda mostra a curva de sinal de controle no maximo, pois a temperatura interna está longe da de referência, enquanto na direita é possível ver a queda do sinal, chegando inclusive a valores negativos, pois a temperatura interna está se igualando à de referência
+<img src="https://github.com/lucasgandac/Trabalho-2-FSE/blob/main/images/forno-init.png" alt="drawing" width="480"/>
+<img src="https://github.com/lucasgandac/Trabalho-2-FSE/blob/main/images/forno.png" alt="drawing" width="480"/>
