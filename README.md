@@ -19,6 +19,9 @@ python3 main.py
 
 Obs : Apesar do bug na gravaçao, a definição das variaveis Ki, Kp e Kd manualmente está funcionando corretamente
 
+## Vídeo
+Segue link do vídeo com gravação da apresentação do trabalho <br>
+[Link da apresentação](https://youtu.be/qEHHe5WtQpw)
 
 ## Imagens
 
