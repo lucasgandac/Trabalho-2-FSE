@@ -109,7 +109,6 @@ class UartController:
         response = uart.read(9)
         response = self.checaCrc(response)
         comando = response[3]
-        print(comando)
         if(comando not in  self.allowValues):
             uart.flushInput()
             uart.flushOutput()
@@ -117,7 +116,6 @@ class UartController:
             uart.reset_output_buffer()
         time.sleep(0.2)
         tempInterna,tempRef = self.solicitaTemperaturas(uart)
-        print(tempInterna, tempRef)
         return comando, tempInterna, tempRef
 
     def checaCrc(self, comando):
