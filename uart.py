@@ -2,7 +2,7 @@ import serial
 import crcmod
 import struct
 import time
-
+import fcntl, termios
 import serial
 import crcmod
 import struct
@@ -25,9 +25,13 @@ class UartController:
         self.codD6 = b'\xD6'
         self.codOn = b'\x01'
         self.codOff = b'\x00'
-
+        self.allowValues = [0, 161, 162, 163, 164, 165]
+        
     def initUart(self):
         self.uart = serial.Serial('/dev/serial0',9600, 8)
+        attrs = termios.tcgetattr(self.uart)
+        attrs[2] |= termios.CRTSCTS
+        termios.tcsetattr(self.uart, termios.TCSANOW, attrs)
         if (self.uart == -1):
             print("Erro - Não foi possível iniciar a UART.\n");
         else:
@@ -76,8 +80,10 @@ class UartController:
         msgReferencia = self.adicionaCRC(codReferencia)
         uart.write(msgInterna)
         interna = uart.read(9)
+        time.sleep(0.2)
         uart.write(msgReferencia)
         referencia = uart.read(9)
+        time.sleep(0.2)
         tempReferencia = referencia[3:7]
         ref = struct.unpack('f', tempReferencia)
         ref = str(ref)
@@ -95,10 +101,20 @@ class UartController:
         codLeitura = b''.join([self.codigo23, self.codC3, self.matricula])
         msgLeitura = self.adicionaCRC(codLeitura)
         uart.write(msgLeitura)
+        #print(msgLeitura)
         response = uart.read(9)
         response = self.checaCrc(response)
         comando = response[3]
-        return comando
+        print(comando)
+        if(comando not in  self.allowValues):
+            uart.flushInput()
+            uart.flushOutput()
+            uart.reset_input_buffer()
+            uart.reset_output_buffer()
+        time.sleep(0.5)
+        tempInterna,tempRef = self.solicitaTemperaturas(uart)
+        print(tempInterna, tempRef)
+        return comando, tempInterna, tempRef
 
     def checaCrc(self, comando):
         mensagem = comando[:7]
